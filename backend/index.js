@@ -1,21 +1,91 @@
 const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
-// This will be our application entry. We'll setup our server here.
-const http = require('http');
-// Set up the express app
+const createError = require('http-errors');
+
 const app = express();
-// Log requests to the console.
+// view engine setup
 app.use(logger('dev'));
-// Parse incoming requests data (https://github.com/expressjs/body-parser)
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-// Setup a default catch-all route that sends back a welcome message in JSON format.
-app.get('*', (req, res) => res.status(200).send({
-message: 'Welcome to the beginning of nothingness.',
+//models
+var models=require("./models");
+//sync Database
+models.sequelize.sync().then(function(){
+    console.log('DB connected...');
+}).catch(function(err){
+    console.log(err,"SOMETHING went wrong with the DB!!!");
+});
+//Routers 
+//require('./routers')(app)
+app.get('./routers',(req,res) => res.status(200).send ({
+    message:'welcome to the beginning.',
 }));
-const port = parseInt(process.env.PORT, 10) || 8000;
-app.set('port', port);
-const server = http.createServer(app);
-server.listen(port);
-module.exports = app
+module.exports = app;
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+const mysql = require('mysql');
+const express = require('express');
+const bodyparser = require('body-parser');
+const cors = require('cors');
+
+var app = express();
+//Configuring express server
+app.use(bodyparser.json());
+app.use(cors());
+var mysqlConnection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'sabapathy24',
+    database: 'demo',
+    multipleStatements: true
+    });
+
+  
+
+app.get('/learners',(err,req,res,next)=>{
+     console.log(err);
+     console.log(req,res);
+     res.header("Access-Control-Allow-Origin", "*");
+     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+     res.setHeader('Access-Control-Allow-Methods', 'POST,GET,OPTIONS,PUT,DELETE');
+     res.end(JSON.stringify({id:1}));
+     next();
+
+});
+
+//app.listen(8080,()=>console.log("8080"));
+
+    //connecting with mysql
+   mysqlConnection.connect((err)=> {
+        if(!err)
+        console.log('Connection Established Successfully');
+        else
+        console.log('Connection Failed!'+ JSON.stringify(err,undefined,2));
+        });
+        const port = process.env.PORT || 8080;
+        app.listen(port, () => console.log(`Listening on port ${port}..`));
+   // postman -path routing
+        app.get('/learners' , (req, res) => {
+
+            mysqlConnection.query('SELECT * FROM login', (err, rows, fields) => {
+            if (!err)
+            res.send(rows);
+            else
+            console.log(err);
+            })
+            } );
+            */
