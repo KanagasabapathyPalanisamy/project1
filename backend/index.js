@@ -2,11 +2,16 @@ const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
 const createError = require('http-errors');
+const cors = require('cors');
+var Strategy = require('passport-local').Strategy;
+var loginController=require('./controllers').login;
+const player =require('./models').player;
 
 const app = express();
 // view engine setup
-app.use(logger('dev'));
-app.use(bodyParser.json());
+app.use(logger('dev'));           //every-reques to console
+app.use(bodyParser.json());       //Parse incoming request bodies in a middleware before your handlers -this is under req.body property
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 //models
 var models=require("./models");
@@ -21,6 +26,44 @@ models.sequelize.sync().then(function(){
 app.get('./routers',(req,res) => res.status(200).send ({
     message:'welcome to the beginning.',
 }));
+var passport = require('passport');
+var Strategy = require('passport-local').Strategy;
+var db = require('../backend/config/passport');
+passport.use(new Strategy(
+    function(username, password, cb) {
+      db.users.findByUsername(username, function(err, user) {
+        if (err) { return cb(err); }
+        if (!user) { return cb(null, false); }
+        if (user.password != password) { return cb(null, false); }
+        return cb(null, user);
+      });
+    }));
+    //app.use(require('morgan')('combined'));
+    app.use(passport.initialize()); //middleware that asscess to req and res  of the objects
+   
+    app.use(function(req, res, next) {      // next -is used to retrive back the responce from the middleware
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      next();
+    });
+  app.post('/api/login',  passport.authenticate('local', { failureRedirect: '/loginfailure' ,session:false}),
+    function(req, res) {
+      res.end(JSON.stringify({success:true}));
+   });
+   app.get('/loginfailure',(req,res)=>res.end(JSON.stringify({success:false})));
+
+   var listener = app.listen(8888, function(){
+    console.log('Listening on port ' + listener.address().port); //Listening on port 8888
+});
+app.post('/api/create',loginController.create);
+app.post('/api/players',(req,res)=>{
+  player.findAll().then(function(players){
+    res.send(players);
+  }).catch(function(err)
+  {
+    res.send(JSON.stringify({success:false}));
+  })
+  });
 module.exports = app;
 
 
@@ -30,62 +73,3 @@ module.exports = app;
 
 
 
-
-
-
-
-
-/*
-
-const mysql = require('mysql');
-const express = require('express');
-const bodyparser = require('body-parser');
-const cors = require('cors');
-
-var app = express();
-//Configuring express server
-app.use(bodyparser.json());
-app.use(cors());
-var mysqlConnection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'sabapathy24',
-    database: 'demo',
-    multipleStatements: true
-    });
-
-  
-
-app.get('/learners',(err,req,res,next)=>{
-     console.log(err);
-     console.log(req,res);
-     res.header("Access-Control-Allow-Origin", "*");
-     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-     res.setHeader('Access-Control-Allow-Methods', 'POST,GET,OPTIONS,PUT,DELETE');
-     res.end(JSON.stringify({id:1}));
-     next();
-
-});
-
-//app.listen(8080,()=>console.log("8080"));
-
-    //connecting with mysql
-   mysqlConnection.connect((err)=> {
-        if(!err)
-        console.log('Connection Established Successfully');
-        else
-        console.log('Connection Failed!'+ JSON.stringify(err,undefined,2));
-        });
-        const port = process.env.PORT || 8080;
-        app.listen(port, () => console.log(`Listening on port ${port}..`));
-   // postman -path routing
-        app.get('/learners' , (req, res) => {
-
-            mysqlConnection.query('SELECT * FROM login', (err, rows, fields) => {
-            if (!err)
-            res.send(rows);
-            else
-            console.log(err);
-            })
-            } );
-            */

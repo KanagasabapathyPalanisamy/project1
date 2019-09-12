@@ -1,5 +1,31 @@
+#game-button{
+    padding:20px;
+    background-color:yellow;
+    color:black;
+    font-size:20px;
+    margin-Top: 15px; 
+}
+#modify-button{
+    padding:10px;
+    background-color:rgb(29, 201, 43);
+    color:black;
+    font-size:15px; 
+    border-radius:10px; 
+    margin-top:15px;
+
+}
+#team-button{
+    padding:10px;
+    background-color:rgb(29, 201, 43);
+    color:black;
+    font-size:15px;
+    border-radius:10px; 
+    margin-Top: 15px;
+}
 #a{
     font-size:30px;
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-family: 'Lucida Sans','Lucida Sans Unicode',Verdana, sans-serif;
     color:rgb(17, 113, 238);
+    text-align: center;
+    border-radius:10px; 
 }
